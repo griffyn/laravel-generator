@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\{{Model}};
+
+class {{Model}}Repository extends Repository
+{
+    protected $model;
+
+    public function __construct({{Model}} $model)
+    {
+        $this->model = $model;
+    }
+
+    public function paginate(array $request = [])
+    {
+        return $this->model->search($request)
+                    ->ordered($request)
+                    ->paginate();
+    }
+
+    public function findOrFail($id, array $request = [])
+    {
+        return $this->model->findOrFail($id);
+    }
+
+    public function pageData(array $request)
+    {
+        return [];
+    }
+
+    public function store(array $request)
+    {
+        return $this->model->create($request);
+    }
+
+    public function update(array $request, $id)
+    {
+        $model = $this->model->findOrFail($id);
+
+        return $model->update($request);
+    }
+
+    public function delete($id)
+    {
+        $ids   = array_values(explode(',', $id));
+        $count = 0;
+
+        foreach ($ids as $id) {
+            $this->model->delete($id);
+            $count++;
+        }
+
+        return $count;
+    }
+}

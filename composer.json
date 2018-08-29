@@ -1,0 +1,19 @@
+{
+    "name": "stormsurges/laravel-generator",
+    "description": "Laravel Scaffold Generator",
+    "type": "library",
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "require-dev": {
+        "laravel/framework": "5.6"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "stormsurges",
+            "email": "surges@aliyun.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}

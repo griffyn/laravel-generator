@@ -1,0 +1,88 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Eloquent\Builder;
+use Cache;
+
+class Model extends EloquentModel
+{
+    protected function performInsert(Builder $query)
+    {
+        $this->attributes = array_only($this->attributes, $this->getColumnListing());
+
+        return parent::performInsert($query);
+    }
+
+    protected function performUpdate(Builder $query)
+    {
+        $this->attributes = array_only($this->attributes, $this->getColumnListing());
+
+        return parent::performUpdate($query);
+    }
+
+    public function scopeEnable($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    public function scopeSearch($query, array $request = [])
+    {
+        $request = array_only($request, $this->getColumnListing());
+
+        foreach ($request as $key => $value) {
+            if (empty($value)) {
+                continue;
+            }
+            if (starts_with($value, '%') || ends_with($value, '%')) {
+                $query = $query->where($key, 'LIKE', $value);
+
+            } elseif (is_array($value) || str_contains($value, '|')) {
+                $value = is_array($value) ? $value : explode('|', $value);
+
+                $query = $query->whereIn($key, $value);
+
+            } else {
+                $query = $query->where($key, $value);
+            }
+        }
+
+        return $query;
+    }
+
+    public function scopeOrdered($query, array $request = [])
+    {
+
+        return $query->orderBy($this->sortKey($request), $this->sortOrder($request));
+    }
+
+    public function getColumnListing($tableName = '')
+    {
+        $tableName = empty($tableName) ? $this->getTable() : $tableName;
+
+        $column = Cache::rememberForever('column_' . $tableName, function () use ($tableName) {
+            return Schema::getColumnListing($tableName);
+        });
+
+        return $column;
+    }
+
+    protected function sortKey(array &$request)
+    {
+        $sort_key = array_get($request, 'sort_key', $this->getKeyName());
+
+        $column = $this->getColumnListing();
+
+        return in_array($sort_key, $column) ? $sort_key : $this->getKeyName();
+    }
+
+    protected function sortOrder(array &$request)
+    {
+        $sort_order = array_get($request, 'sort_order', 'DESC');
+
+        return in_array($sort_order, ['DESC', 'ASC']) ? $sort_order : 'DESC';
+
+    }
+}

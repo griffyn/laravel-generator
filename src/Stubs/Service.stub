@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Services;
+
+use Repositories\{{Model}}Repository;
+
+class {{Models}}Service extends Service
+{
+    protected $repository;
+
+    public function __construct({{Model}}Repository $repository)
+    {
+        $this->repository = $repository;
+    }
+
+    public function paginate(array $request = [])
+    {
+        return $this->repository->paginate($request);
+    }
+
+    public function choice(array $request = [])
+    {
+        return $this->repository->all($request);
+    }
+
+    public function findOrFail($id, array $request = [])
+    {
+        return $this->repository->findOrFail($id, $request);
+    }
+
+    public function pageData(array $request)
+    {
+        return [];
+    }
+
+    public function store(array $request)
+    {
+        return $this->repository->store($request);
+    }
+
+    public function update(array $request, $id)
+    {
+        return $this->repository->update($request, $id);
+    }
+
+    public function delete($id, array $request = [])
+    {
+        $ids   = array_values(explode(',', $id));
+        $count = 0;
+
+        foreach ($ids as $id) {
+            $this->repository->delete($id);
+            $count++;
+        }
+
+        return $count;
+    }
+}

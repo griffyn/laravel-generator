@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\{{Model}}Request;
+use App\Http\Resources\collections\{{Models}}Collection;
+use App\Http\Resources\{{Model}}Resource;
+use Illuminate\Http\Request;
+use App\Repositories\{{Model}}Repository;
+
+class {{Models}}Controller extends Controller
+{
+    protected $repository;
+    protected $resource;
+    protected $collections;
+
+    public function __construct({{Model}}Repository $repository)
+    {
+        $this->repository    = $repository;
+        $this->resource   = {{Model}}Resource::class;
+        $this->collections = {{Models}}Collection::class;
+
+        $this->middleware('auth', ['except' => ['index', 'show']]);
+    }
+
+    public function index(Request $request)
+    {
+
+        $lists = $this->repository->paginate($request->all());
+
+        return $this->success([
+            'lists' => new $this->collections($lists),
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $data = $this->repository->findOrFail($id);
+
+        return $this->success([
+            'data' => new $this->resource($data),
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        $pageData = $this->repository->pageData($request->all());
+
+        return $this->success([
+            'pageData' => $pageData,
+        ]);
+    }
+
+    public function store({{Model}}Request $request)
+    {
+        $data = $this->repository->store($request->all());
+
+        return $this->success([
+            'data' => new $this->resource($data),
+        ]);
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $data     = $this->repository->findOrFail($id);
+        $pageData = $this->repository->pageData($request->all());
+
+        return $this->success([
+            'data'     => new $this->resource($data),
+            'pageData' => $pageData,
+        ]);
+    }
+
+    public function update({{Model}}Request $request, $id)
+    {
+        $data = $this->repository->update($request->all(), $id);
+
+        return $this->success([
+            'data' => new $this->resource($data),
+        ]);
+    }
+
+    public function destroy({{Model}}Request $request, $ids)
+    {
+        $count = $this->repository->delete($ids);
+
+        return $this->success([
+            'count' => $count,
+        ]);
+    }
+}
